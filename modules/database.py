@@ -1,34 +1,104 @@
 import sqlite3
-import os
 
 
 def connect_db():
-    conn = sqlite3.connect("../db/password_manager.db")
-    return conn
+    return sqlite3.connect("../db/password_manager.db")
 
 
 def create_tables(cursor):
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Users(
-        UserID INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE,
+        userID INTEGER PRIMARY KEY,
+        user TEXT UNIQUE,
         master_password TEXT,
         salt TEXT
     )
     """)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Passwords(
-        PasswordID INTEGER PRIMARY KEY AUTOINCREMENT,
-        UserID INTEGER
-        Password TEXT,
+        passwordID INTEGER PRIMARY KEY,
+        userID INTEGER,
+        name TEXT,
+        password TEXT UNIQUE,
         salt TEXT,
-        FOREIGN KEY(UserID) REFERENCES Users(UserID)
+        FOREIGN KEY(userID) REFERENCES Users(userID)
     )
     """)
 
 
-conn = connect_db()
-cursor = conn.cursor()
-create_tables(cursor)
-conn.close()
-print("hello")
+def add_user(user, hashed_master, salt):
+    try:
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            create_tables(cursor)
+
+            cursor.execute(
+                "INSERT into Users (user, master_password, salt) VALUES (?, ?, ?)",
+                (user, hashed_master, salt),
+            )
+    except sqlite3.Error as e:
+        print(f"An error occured while adding the user: {e}")
+
+
+def add_password(encrypted_password, userID, salt, name):
+    try:
+        with connect_db() as conn:
+            cursor = conn.cursor()
+            create_tables(cursor)
+
+            cursor.execute(
+                "INSERT into Passwords (userID, password, salt, name) VALUES (?, ?, ?, ?)",
+                (userID, encrypted_password, salt, name),
+            )
+    except sqlite3.Error as e:
+        print(f"An error occured while adding the password: {e}")
+
+
+def get_userID(user):
+    try:
+        with connect_db() as conn:
+            cursor = conn.cursor()
+
+            userID = cursor.execute(
+                "SELECT UserID FROM Users WHERE user is ?", (user,)
+            ).fetchone()
+            return userID
+    except sqlite3.Error as e:
+        print(f"An error occured while retrieving userID: {e}")
+
+
+def get_PasswordID(userID, name):
+    try:
+        with connect_db() as conn:
+            cursor = conn.cursor()
+
+            passID = cursor.execute(
+                "SELECT passwordID FROM Passwords WHERE passwordID is ? and name is ?",
+                (
+                    userID,
+                    name,
+                ),
+            ).fetchone()
+            return passID
+    except sqlite3.Error as e:
+        print(f"An error occured while retrieving passID: {e}")
+
+
+def get_Password(passwordID):
+    try:
+        with connect_db() as conn:
+            cursor = conn.cursor()
+
+            password = cursor.execute(
+                "SELECT password FROM Passwords WHERE passwordID is ?", (passwordID,)
+            ).fetchone()
+
+            return password
+    except sqlite3.Error as e:
+        print(f"An error occured while retrieving Password: {e}")
+
+
+add_user("Patrick", "thisisdefinitelyhashed", "salty")
+use = get_userID("Patrick")
+print(use)
+add_password("thisieencrypted", use[0], "salty", "Facebook")
