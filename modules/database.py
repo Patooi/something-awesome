@@ -96,9 +96,3 @@ def get_Password(passwordID):
             return password
     except sqlite3.Error as e:
         print(f"An error occured while retrieving Password: {e}")
-
-
-add_user("Patrick", "thisisdefinitelyhashed", "salty")
-use = get_userID("Patrick")
-print(use)
-add_password("thisieencrypted", use[0], "salty", "Facebook")
