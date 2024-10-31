@@ -30,7 +30,8 @@ def create_tables(cursor):
         passwordID INTEGER PRIMARY KEY,
         userID INTEGER,
         name TEXT,
-        password TEXT UNIQUE,
+        password BLOB,
+        nonce BLOB,
         salt TEXT,
         FOREIGN KEY(userID) REFERENCES Users(userID)
     )
@@ -57,6 +58,15 @@ def add_password(encrypted_password, userID, salt, name):
             cursor = conn.cursor()
             create_tables(cursor)
 
+            find_existing = cursor.execute(
+                "SELECT * from Passwords WHERE userID = ? and name = ?",
+                (userID, name),
+            ).fetchone()
+            if find_existing is not None:
+                raise ValueError(
+                    "A password with this name already exists for this user"
+                )
+
             cursor.execute(
                 "INSERT into Passwords (userID, password, salt, name) VALUES (?, ?, ?, ?)",
                 (userID, encrypted_password, salt, name),
@@ -71,7 +81,7 @@ def get_userID(user):
             cursor = conn.cursor()
 
             userID = cursor.execute(
-                "SELECT UserID FROM Users WHERE user is ?", (user,)
+                "SELECT UserID FROM Users WHERE user = ?", (user,)
             ).fetchone()
             return userID
     except sqlite3.Error as e:
@@ -84,7 +94,7 @@ def get_passwordID(userID, name):
             cursor = conn.cursor()
 
             passID = cursor.execute(
-                "SELECT passwordID FROM Passwords WHERE passwordID is ? and name is ?",
+                "SELECT passwordID FROM Passwords WHERE passwordID = ? and name = ?",
                 (
                     userID,
                     name,
@@ -101,7 +111,7 @@ def get_password(passwordID):
             cursor = conn.cursor()
 
             password = cursor.execute(
-                "SELECT password, salt FROM Passwords WHERE passwordID is ?",
+                "SELECT password, iv, salt FROM Passwords WHERE passwordID = ?",
                 (passwordID,),
             ).fetchone()
 
@@ -116,7 +126,7 @@ def get_all_passwords(userID):
             cursor = conn.cursor()
 
             passwords = cursor.execute(
-                "SELECT password, salt FROM Passwords WHERE userID is ?", (userID,)
+                "SELECT password, salt FROM Passwords WHERE userID = ?", (userID,)
             ).fetchall()
 
             return passwords
@@ -128,7 +138,7 @@ def delete_password(passwordID):
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Passwords WHERE passwordID is ?", (passwordID,))
+            cursor.execute("DELETE FROM Passwords WHERE passwordID = ?", (passwordID,))
     except sqlite3.Error as e:
         raise RuntimeError(f"An error occured while deleting the password: {e}")
 
@@ -137,7 +147,7 @@ def delete_all_passwords(userID):
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Passwords WHERE userID is ?", (userID,))
+            cursor.execute("DELETE FROM Passwords WHERE userID = ?", (userID,))
     except sqlite3.Error as e:
         raise RuntimeError(f"An error occured while deleting the user's passwords: {e}")
 
@@ -146,7 +156,7 @@ def delete_user(userID):
     try:
         with connect_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM Users WHERE userID is ?", (userID,))
+            cursor.execute("DELETE FROM Users WHERE userID = ?", (userID,))
 
             delete_all_passwords(userID)
     except sqlite3.Error as e:
