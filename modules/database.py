@@ -31,8 +31,9 @@ def create_tables(cursor):
         userID INTEGER,
         name TEXT,
         password BLOB,
-        nonce BLOB,
+        iv BLOB,
         salt TEXT,
+        tag BLOB
         FOREIGN KEY(userID) REFERENCES Users(userID)
     )
     """)
