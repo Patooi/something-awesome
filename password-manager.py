@@ -3,6 +3,7 @@ import os
 from modules import add_user
 import getpass
 import string
+import pyperclip
 
 from modules.database import (
     add_password,
@@ -212,7 +213,9 @@ def retrieve_password(user, master_password):
             "black",
             "on_green",
         )
+        + colored("The password has also been copied to your clipboard\n", "blue")
     )
+    pyperclip.copy(f"{decrypted_password.decode('utf-8')}")
 
 
 def retrieve_passwords(user):
