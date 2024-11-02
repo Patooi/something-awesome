@@ -70,10 +70,11 @@ def get_userID(user):
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
 
+            create_tables(cursor)
             userID = cursor.execute(
                 "SELECT UserID FROM Users WHERE user = ?", (user,)
             ).fetchone()
-            return userID[0]
+            return userID[0] if userID else None
     except sqlite3.Error as e:
         raise RuntimeError(f"An error occured while retrieving userID: {e}")
 
@@ -82,6 +83,7 @@ def get_master_password(user):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             master_password = cursor.execute(
                 "SELECT master_password, salt FROM Users WHERE user = ?", (user,)
@@ -97,6 +99,7 @@ def get_passwordID(userID, name):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             passID = cursor.execute(
                 "SELECT passwordID FROM Passwords WHERE userID = ? and name = ?",
@@ -114,6 +117,7 @@ def get_password(name, user):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             userID = get_userID(user)
 
@@ -130,6 +134,7 @@ def get_password_names(user):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             userID = get_userID(user)
 
@@ -145,6 +150,7 @@ def delete_password(name, user):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             userID = get_userID(user)
 
@@ -159,6 +165,8 @@ def delete_all_passwords(userID):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
+
             cursor.execute("DELETE FROM Passwords WHERE userID = ?", (userID,))
             conn.commit()
     except sqlite3.Error as e:
@@ -169,6 +177,7 @@ def delete_user(user):
     try:
         with sqlite3.connect("password_manager.db") as conn:
             cursor = conn.cursor()
+            create_tables(cursor)
 
             userID = get_userID(user)
 
