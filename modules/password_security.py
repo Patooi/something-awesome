@@ -6,12 +6,12 @@ from Crypto.Random import get_random_bytes
 
 def hash_master_password(password):
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password, salt)
+    hashed = bcrypt.hashpw(password.encode(), salt)
     return (hashed, salt)
 
 
 def compare_master_password(hashed, password, salt):
-    new_hash = bcrypt.hashpw(password, salt)
+    new_hash = bcrypt.hashpw(password.encode(), salt)
     return new_hash == hashed
 
 
@@ -46,8 +46,3 @@ def decrypt_password(iv, salt, tag, ciphertext, master_password):
     password = cipher.decrypt_and_verify(ciphertext, tag)
 
     return password
-
-
-ciphertext, salt, tag, iv = encrypt_password("master", "mypassword")
-password = decrypt_password(iv, salt, tag, ciphertext, "master")
-print(password)

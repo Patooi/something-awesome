@@ -1,7 +1,6 @@
 import pwnedpasswords
 import re
 import secrets
-import string
 
 
 def check_breaches(password):
@@ -15,9 +14,9 @@ def is_valid_master(password):
     num_breaches = pwnedpasswords.check(password)
 
     if len(password) < min_length:
-        return (False, "Password must be greater than 12 characters.")
+        return (False, "Password must be greater than 14 characters.")
     elif num_breaches != 0:
-        return (False, f"Password has appeared in {num_breaches} breaches")
+        return (False, f"Password has appeared in {num_breaches} breaches.")
     elif not re.search(r"[A-Z]", password):
         return (False, "Password must have at least one upper-case letter.")
     elif not re.search(r"[a-z]", password):
@@ -25,9 +24,9 @@ def is_valid_master(password):
     elif not re.search(r"[0-9]", password):
         return (False, "Password must have at least one number.")
     elif not re.search(r"[!@#$%^&*()_+\-=\[\]{};:\\|,.<>\/?~\'\"]", password):
-        return (False, "Password must have at least one special character")
+        return (False, "Password must have at least one special character.")
     elif re.search(r"\s", password):
-        return (False, "Password must not contain whitespaces")
+        return (False, "Password must not contain whitespaces.")
 
     return (True, "Valid Password.")
 

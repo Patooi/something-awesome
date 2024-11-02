@@ -1,0 +1,4 @@
+pwnedpasswords==2.0.0
+pycryptodome==3.21.0
+python_bcrypt==0.3.2
+termcolor==2.5.0
