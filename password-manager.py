@@ -125,7 +125,6 @@ def logged_in(user, master_password):
             remove_password(user)
         elif user_input == "5":
             remove_account(user, master_password)
-            print(f"Account {user} deleted! See ya.")
             break
         else:
             clear_screen()
@@ -241,6 +240,7 @@ def remove_password(user):
         password = get_password(name, user)
         if password is None:
             print(colored("Password does not exist. Please try again.\n", "red"))
+            continue
         break
     confirmation = input(colored(f"Are you sure you want to remove {name}? (y/n)\n"))
     if confirmation.lower() == "n":
@@ -269,9 +269,11 @@ def remove_account(user, master_password):
             return
         elif password != master_password:
             print(colored("Incorrect. Please try again.\n", "red"))
+            continue
         break
 
     delete_user(user)
+    print(f"Account {user} deleted! See ya.")
 
 
 if __name__ == "__main__":
