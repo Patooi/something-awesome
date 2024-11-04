@@ -7,7 +7,7 @@ def create_tables(cursor):
         userID INTEGER PRIMARY KEY,
         user TEXT UNIQUE,
         master_password TEXT,
-        salt TEXT
+        salt BLOB
     )
     """)
     cursor.execute("""
@@ -17,7 +17,7 @@ def create_tables(cursor):
         name TEXT,
         password BLOB,
         iv BLOB,
-        salt TEXT,
+        salt BLOB,
         tag BLOB,
         FOREIGN KEY(userID) REFERENCES Users(userID)
     )

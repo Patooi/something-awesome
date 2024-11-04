@@ -2,21 +2,22 @@ import bcrypt
 import hashlib
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
+import os
 
 
 def hash_master_password(password):
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode(), salt)
+    hashed = bcrypt.hashpw(password, salt)
     return (hashed, salt)
 
 
 def compare_master_password(hashed, password, salt):
-    new_hash = bcrypt.hashpw(password.encode(), salt)
+    new_hash = bcrypt.hashpw(password, salt)
     return new_hash == hashed
 
 
 def encrypt_password(master_password, password):
-    salt = bcrypt.gensalt()
+    salt = os.urandom(16)
 
     key_length = 32
     iterations = 10000
